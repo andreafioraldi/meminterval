@@ -15,7 +15,7 @@ pub struct IntervalTreeIterator<'a, T: Ord + Clone, V> {
     pub(crate) interval: Interval<T>,
 }
 
-impl<'a, T: Ord + Copy + 'a, V: 'a> Iterator for IntervalTreeIterator<'a, T, V> {
+impl<'a, T: Ord + Copy + Debug + 'a, V: 'a> Iterator for IntervalTreeIterator<'a, T, V> {
     type Item = Entry<'a, T, V>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -25,19 +25,23 @@ impl<'a, T: Ord + Copy + 'a, V: 'a> Iterator for IntervalTreeIterator<'a, T, V> 
                 Some(node) => node,
             };
 
-            if cur.right_child.is_some() {
-                self.nodes.push(cur.right_child.as_ref().unwrap());
-            }
-            if cur.left_child.is_some() && cur.left_child.as_ref().unwrap().max >= self.interval.end
-            {
-                self.nodes.push(cur.left_child.as_ref().unwrap());
-            }
+            if self.interval.start < cur.max {
+                if let Some(left) = &cur.left_child {
+                    self.nodes.push(left);
+                }
 
-            if cur.interval.intersect(&self.interval).is_some() {
-                return Some(Entry {
-                    value: cur.value.as_ref().unwrap(),
-                    interval: &cur.interval,
-                });
+                if self.interval.end > cur.interval.start {
+                    if let Some(right) = &cur.right_child {
+                        self.nodes.push(right);
+                    }
+
+                    if cur.interval.intersect(&self.interval).is_some() {
+                        return Some(Entry {
+                            value: cur.value.as_ref().unwrap(),
+                            interval: &cur.interval,
+                        });
+                    }
+                }
             }
         }
     }
@@ -64,19 +68,23 @@ impl<'a, T: Ord + Copy + 'a, V: 'a> Iterator for IntervalTreeIteratorMut<'a, T, 
                 Some(node) => node,
             };
 
-            if cur.right_child.is_some() {
-                self.nodes.push(cur.right_child.as_mut().unwrap());
-            }
-            if cur.left_child.is_some() && cur.left_child.as_ref().unwrap().max >= self.interval.end
-            {
-                self.nodes.push(cur.left_child.as_mut().unwrap());
-            }
+            if self.interval.start < cur.max {
+                if let Some(left) = &mut cur.left_child {
+                    self.nodes.push(left);
+                }
 
-            if cur.interval.intersect(&self.interval).is_some() {
-                return Some(EntryMut {
-                    value: cur.value.as_mut().unwrap(),
-                    interval: &cur.interval,
-                });
+                if self.interval.end > cur.interval.start {
+                    if let Some(right) = &mut cur.right_child {
+                        self.nodes.push(right);
+                    }
+
+                    if cur.interval.intersect(&self.interval).is_some() {
+                        return Some(EntryMut {
+                            value: cur.value.as_mut().unwrap(),
+                            interval: &cur.interval,
+                        });
+                    }
+                }
             }
         }
     }

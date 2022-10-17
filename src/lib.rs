@@ -266,3 +266,36 @@ impl<T: Ord + Clone, V> IntervalTree<T, V> {
         Some(IntervalTree::balance(node))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn query_1() {
+        let mut tree = IntervalTree::<usize, bool>::new();
+        for i in 0..10 {
+            tree.insert((i * 10)..(i * 10 + 10), false);
+        }
+
+        let mut cnt = 0;
+        for e in tree.query(0..10000) {
+            cnt += 1;
+        }
+        assert_eq!(cnt, 10);
+    }
+
+    #[test]
+    fn query_2() {
+        let mut tree = IntervalTree::<usize, bool>::new();
+        for i in 0..10 {
+            tree.insert((i * 10)..(i * 10 + 10), false);
+        }
+
+        let mut cnt = 0;
+        for e in tree.query(0..30) {
+            cnt += 1;
+        }
+        assert_eq!(cnt, 3);
+    }
+}
