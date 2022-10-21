@@ -265,6 +265,10 @@ impl<T: Ord + Clone, V> IntervalTree<T, V> {
 
         Some(IntervalTree::balance(node))
     }
+
+    pub fn clear(&mut self) {
+        self.root = None;
+    }
 }
 
 #[cfg(test)]
