@@ -1,8 +1,9 @@
 use core::{
     cmp::{max, min, Eq, Ord, Ordering, PartialEq, PartialOrd},
     fmt::{Debug, Display},
-    ops::Range,
+    ops::{Range, RangeInclusive},
 };
+use num::{One, CheckedAdd};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Interval<T: Ord> {
@@ -87,5 +88,17 @@ impl<T: Ord + Clone> From<Range<T>> for Interval<T> {
 impl<T: Ord + Clone> From<&Range<T>> for Interval<T> {
     fn from(range: &Range<T>) -> Self {
         Interval::new(range.start.clone(), range.end.clone())
+    }
+}
+
+impl<T: Ord + Clone + CheckedAdd + One> From<RangeInclusive<T>> for Interval<T> {
+    fn from(range: RangeInclusive<T>) -> Self {
+        Interval::new(range.start().clone(), range.end().clone() + T::one())
+    }
+}
+
+impl<T: Ord + Clone + CheckedAdd + One> From<&RangeInclusive<T>> for Interval<T> {
+    fn from(range: &RangeInclusive<T>) -> Self {
+        Interval::new(range.start().clone(), range.end().clone() + T::one())
     }
 }
