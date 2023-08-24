@@ -4,8 +4,11 @@ use core::{
     ops::{Range, RangeInclusive},
 };
 use num::{CheckedAdd, One};
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Copy, Clone)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Interval<T: Ord> {
     pub start: T,
     pub end: T,

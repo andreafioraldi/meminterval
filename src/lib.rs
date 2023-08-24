@@ -69,6 +69,9 @@ pub extern crate alloc;
 use alloc::boxed::Box;
 use core::cmp::{Ord, Ordering};
 
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
 mod node;
 use node::Node;
 
@@ -79,6 +82,7 @@ mod iterators;
 pub use iterators::{Entry, EntryMut, IntervalTreeIterator, IntervalTreeIteratorMut};
 
 #[derive(Clone, Debug, Default)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct IntervalTree<T: Ord + Clone, V> {
     root: Option<Box<Node<T, V>>>,
 }
