@@ -4,41 +4,36 @@
 
 #![no_std]
 #![warn(clippy::cargo)]
-#![allow(ambiguous_glob_reexports)]
 #![deny(clippy::cargo_common_metadata)]
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(clippy::all)]
 #![deny(clippy::pedantic)]
-#![allow(
-    clippy::unreadable_literal,
-    clippy::type_repetition_in_bounds,
-    clippy::missing_errors_doc,
-    clippy::cast_possible_truncation,
-    clippy::used_underscore_binding,
-    clippy::ptr_as_ptr,
-    clippy::missing_panics_doc,
-    clippy::missing_docs_in_private_items,
-    clippy::module_name_repetitions
+#![allow(clippy::missing_panics_doc)]
+#![cfg_attr(
+    not(test),
+    warn(
+        missing_debug_implementations,
+        trivial_casts,
+        trivial_numeric_casts,
+        unused_extern_crates,
+        unused_import_braces,
+        unused_qualifications,
+        unused_results
+    )
 )]
-#![cfg_attr(not(test), warn(
-    missing_debug_implementations,
-    //trivial_casts,
-    trivial_numeric_casts,
-    unused_extern_crates,
-    unused_import_braces,
-    unused_qualifications,
-    //unused_results
-))]
-#![cfg_attr(test, deny(
-    missing_debug_implementations,
-    //trivial_casts,
-    trivial_numeric_casts,
-    unused_extern_crates,
-    unused_import_braces,
-    unused_qualifications,
-    unused_must_use,
-    //unused_results
-))]
+#![cfg_attr(
+    test,
+    deny(
+        missing_debug_implementations,
+        trivial_casts,
+        trivial_numeric_casts,
+        unused_extern_crates,
+        unused_import_braces,
+        unused_qualifications,
+        unused_must_use,
+        unused_results
+    )
+)]
 #![cfg_attr(
     test,
     deny(
@@ -59,9 +54,6 @@
         while_true
     )
 )]
-// Till they fix this buggy lint in clippy
-#![allow(clippy::borrow_as_ptr)]
-#![allow(clippy::borrow_deref_ref)]
 
 #[macro_use]
 pub extern crate alloc;
