@@ -3,7 +3,7 @@ use core::{
     fmt::{Debug, Display},
     ops::{Range, RangeInclusive},
 };
-use num::{CheckedAdd, One};
+use num_traits::{CheckedAdd, One};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
