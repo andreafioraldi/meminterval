@@ -10,6 +10,7 @@ pub struct Entry<'a, T: Ord, V> {
     pub interval: &'a Interval<T>,
 }
 
+#[derive(Debug)]
 pub struct IntervalTreeIterator<'a, T: Ord + Clone, V> {
     pub(crate) nodes: Vec<&'a Node<T, V>>,
     pub(crate) interval: Interval<T>,
@@ -53,6 +54,7 @@ pub struct EntryMut<'a, T: Ord, V> {
     pub interval: &'a Interval<T>,
 }
 
+#[derive(Debug)]
 pub struct IntervalTreeIteratorMut<'a, T: Ord + Clone, V> {
     pub(crate) nodes: Vec<&'a mut Node<T, V>>,
     pub(crate) interval: Interval<T>,
