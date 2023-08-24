@@ -59,7 +59,10 @@
 pub extern crate alloc;
 
 use alloc::boxed::Box;
-use core::cmp::{Ord, Ordering};
+use core::{
+    cmp::{Ord, Ordering},
+    ops::Range,
+};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -338,8 +341,20 @@ impl<T: Ord + Clone, V> IntervalTree<T, V> {
     }
 }
 
+impl<T: Ord + Clone, V> FromIterator<(Range<T>, V)> for IntervalTree<T, V> {
+    fn from_iter<I: IntoIterator<Item = (Range<T>, V)>>(iter: I) -> Self {
+        let mut ret = IntervalTree::new();
+        for (interval, value) in iter {
+            ret.insert(interval, value);
+        }
+        ret
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use alloc::vec::Vec;
+
     use super::*;
 
     #[test]
@@ -368,5 +383,53 @@ mod tests {
             cnt += 1;
         }
         assert_eq!(cnt, 3);
+    }
+
+    fn verify(tree: &IntervalTree<u32, u32>, i: u32, expected: &[u32]) {
+        let mut v1: Vec<_> = tree.query(i..=i).map(|x| *x.value).collect();
+        v1.sort();
+        let mut v2: Vec<_> = tree.query(i..(i + 1)).map(|x| *x.value).collect();
+        v2.sort();
+        assert_eq!(v1, expected);
+        assert_eq!(v2, expected);
+    }
+
+    #[test]
+    fn it_works() {
+        let tree: IntervalTree<u32, u32> = [
+            (0..3, 1),
+            (1..4, 2),
+            (2..5, 3),
+            (3..6, 4),
+            (4..7, 5),
+            (5..8, 6),
+            (4..5, 7),
+            (2..7, 8),
+        ]
+        .iter()
+        .cloned()
+        .collect();
+
+        verify(&tree, 0, &[1]);
+        verify(&tree, 1, &[1, 2]);
+        verify(&tree, 2, &[1, 2, 3, 8]);
+        verify(&tree, 3, &[2, 3, 4, 8]);
+        verify(&tree, 4, &[3, 4, 5, 7, 8]);
+        verify(&tree, 5, &[4, 5, 6, 8]);
+        verify(&tree, 6, &[5, 6, 8]);
+        verify(&tree, 7, &[6]);
+        verify(&tree, 8, &[]);
+        verify(&tree, 9, &[]);
+
+        assert_eq!(tree.query(1..1).next(), None);
+        assert_eq!(tree.query(1..=2).next().unwrap().interval.end, 4);
+        assert_eq!(tree.query(1..=2).next().unwrap().value, &2);
+        assert_eq!(tree.query(1..=5).next().unwrap().value, &4);
+    }
+
+    #[test]
+    fn empty() {
+        let tree: IntervalTree<u32, u32> = IntervalTree::new();
+        verify(&tree, 42, &[]);
     }
 }
