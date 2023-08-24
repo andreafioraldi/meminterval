@@ -68,7 +68,6 @@ pub extern crate alloc;
 
 use alloc::boxed::Box;
 use core::cmp::{Ord, Ordering};
-
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
