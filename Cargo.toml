@@ -15,5 +15,5 @@ categories = ["data-structures", "algorithms", "no-std"]
 serde = ["dep:serde"]
 
 [dependencies]
-num = { version = "0.4", default-features = false }
+num-traits = { version = "0.2", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"], optional = true }
