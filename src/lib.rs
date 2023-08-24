@@ -1,8 +1,73 @@
+/*!
+ * A simple interval-tree in Rust made to store memory mappings
+ */
+
+#![no_std]
+#![warn(clippy::cargo)]
+#![allow(ambiguous_glob_reexports)]
+#![deny(clippy::cargo_common_metadata)]
+#![deny(rustdoc::broken_intra_doc_links)]
+#![deny(clippy::all)]
+#![deny(clippy::pedantic)]
+#![allow(
+    clippy::unreadable_literal,
+    clippy::type_repetition_in_bounds,
+    clippy::missing_errors_doc,
+    clippy::cast_possible_truncation,
+    clippy::used_underscore_binding,
+    clippy::ptr_as_ptr,
+    clippy::missing_panics_doc,
+    clippy::missing_docs_in_private_items,
+    clippy::module_name_repetitions
+)]
+#![cfg_attr(not(test), warn(
+    missing_debug_implementations,
+    //trivial_casts,
+    trivial_numeric_casts,
+    unused_extern_crates,
+    unused_import_braces,
+    unused_qualifications,
+    //unused_results
+))]
+#![cfg_attr(test, deny(
+    missing_debug_implementations,
+    //trivial_casts,
+    trivial_numeric_casts,
+    unused_extern_crates,
+    unused_import_braces,
+    unused_qualifications,
+    unused_must_use,
+    //unused_results
+))]
+#![cfg_attr(
+    test,
+    deny(
+        bad_style,
+        dead_code,
+        improper_ctypes,
+        non_shorthand_field_patterns,
+        no_mangle_generic_items,
+        overflowing_literals,
+        path_statements,
+        patterns_in_fns_without_body,
+        private_in_public,
+        unconditional_recursion,
+        unused,
+        unused_allocation,
+        unused_comparisons,
+        unused_parens,
+        while_true
+    )
+)]
+// Till they fix this buggy lint in clippy
+#![allow(clippy::borrow_as_ptr)]
+#![allow(clippy::borrow_deref_ref)]
+
 #[macro_use]
 pub extern crate alloc;
 
 use alloc::boxed::Box;
-use core::cmp::Ord;
+use core::cmp::{Ord, Ordering};
 
 mod node;
 use node::Node;
@@ -86,6 +151,7 @@ impl<T: Ord + Clone, V> IntervalTree<T, V> {
         ));
     }
 
+    #[allow(clippy::unnecessary_box_returns)]
     fn insert_helper(
         node: Option<Box<Node<T, V>>>,
         interval: Interval<T>,
@@ -98,22 +164,24 @@ impl<T: Ord + Clone, V> IntervalTree<T, V> {
 
         let mut node_ref = node.unwrap();
 
-        if interval < node_ref.interval {
-            node_ref.left_child = Some(IntervalTree::insert_helper(
-                node_ref.left_child,
-                interval,
-                value,
-                max,
-            ));
-        } else if interval > node_ref.interval {
-            node_ref.right_child = Some(IntervalTree::insert_helper(
-                node_ref.right_child,
-                interval,
-                value,
-                max,
-            ));
-        } else {
-            return node_ref;
+        match interval.cmp(&node_ref.interval) {
+            Ordering::Less => {
+                node_ref.left_child = Some(IntervalTree::insert_helper(
+                    node_ref.left_child,
+                    interval,
+                    value,
+                    max,
+                ));
+            }
+            Ordering::Greater => {
+                node_ref.right_child = Some(IntervalTree::insert_helper(
+                    node_ref.right_child,
+                    interval,
+                    value,
+                    max,
+                ));
+            }
+            Ordering::Equal => return node_ref,
         }
 
         node_ref.update_height();
@@ -123,6 +191,7 @@ impl<T: Ord + Clone, V> IntervalTree<T, V> {
         IntervalTree::balance(node_ref)
     }
 
+    #[allow(clippy::unnecessary_box_returns)]
     fn balance(mut node: Box<Node<T, V>>) -> Box<Node<T, V>> {
         if Node::balance_factor(&node) < -1 {
             if Node::balance_factor(node.right_child.as_ref().unwrap()) > 0 {
@@ -138,6 +207,7 @@ impl<T: Ord + Clone, V> IntervalTree<T, V> {
         node
     }
 
+    #[allow(clippy::unnecessary_box_returns)]
     fn rotate_right(mut node: Box<Node<T, V>>) -> Box<Node<T, V>> {
         let mut y = node.left_child.unwrap();
         node.left_child = y.right_child;
@@ -153,6 +223,7 @@ impl<T: Ord + Clone, V> IntervalTree<T, V> {
         y
     }
 
+    #[allow(clippy::unnecessary_box_returns)]
     fn rotate_left(mut node: Box<Node<T, V>>) -> Box<Node<T, V>> {
         let mut y = node.right_child.unwrap();
         node.right_child = y.left_child;
@@ -207,6 +278,7 @@ impl<T: Ord + Clone, V> IntervalTree<T, V> {
         }
     }
 
+    #[allow(clippy::unnecessary_box_returns)]
     fn min(node: &mut Option<Box<Node<T, V>>>) -> Box<Node<T, V>> {
         match node {
             Some(node) => {
@@ -283,7 +355,7 @@ mod tests {
         }
 
         let mut cnt = 0;
-        for e in tree.query(0..10000) {
+        for _ in tree.query(0..10000) {
             cnt += 1;
         }
         assert_eq!(cnt, 10);
@@ -297,7 +369,7 @@ mod tests {
         }
 
         let mut cnt = 0;
-        for e in tree.query(0..30) {
+        for _ in tree.query(0..30) {
             cnt += 1;
         }
         assert_eq!(cnt, 3);

@@ -3,7 +3,7 @@ use core::{
     fmt::{Debug, Display},
     ops::{Range, RangeInclusive},
 };
-use num::{One, CheckedAdd};
+use num::{CheckedAdd, One};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Interval<T: Ord> {
@@ -45,25 +45,10 @@ impl<T: Ord> Eq for Interval<T> {}
 
 impl<T: Ord> PartialOrd for Interval<T> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        let mut result = if self.start < other.start {
-            Some(Ordering::Less)
-        } else if self.start == other.start {
-            None
-        } else {
-            Some(Ordering::Greater)
-        };
-
-        if result.is_none() {
-            result = if self.end < other.end {
-                Some(Ordering::Less)
-            } else if self.end == other.end {
-                Some(Ordering::Equal)
-            } else {
-                Some(Ordering::Greater)
-            }
-        }
-
-        result
+        Some(match self.start.cmp(&other.start) {
+            Ordering::Equal => self.end.cmp(&other.end),
+            ord => ord,
+        })
     }
 }
 
