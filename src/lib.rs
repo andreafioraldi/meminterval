@@ -420,6 +420,11 @@ mod tests {
         verify(&tree, 7, &[6]);
         verify(&tree, 8, &[]);
         verify(&tree, 9, &[]);
+
+        assert_eq!(tree.query(1..1).next(), None);
+        assert_eq!(tree.query(1..=2).next().unwrap().interval.end, 4);
+        assert_eq!(tree.query(1..=2).next().unwrap().value, &2);
+        assert_eq!(tree.query(1..=5).next().unwrap().value, &4);
     }
 
     #[test]
